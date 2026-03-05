@@ -1,0 +1,37 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend/.env
+    develop:
+      watch:
+        # 监听 package.json 与 package-lock.json 的变更，有改动则重新构建容器镜像
+        - path: ./backend/package.json
+          action: rebuild
+        - path: ./backend/package-lock.json
+          action: rebuild
+
+        # 监听整个 backend 目录，有改动则实时同步至容器内
+        - path: ./backend
+          target: /app
+          action: sync
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    develop:
+      watch:
+        # 监听 package.json 与 package-lock.json 的变更，有改动则重新构建镜像
+        - path: ./frontend/package.json
+          action: rebuild
+        - path: ./frontend/package-lock.json
+          action: rebuild
+        # 监听整个 frontend 目录，有改动则实时同步至容器内
+        - path: ./frontend
+          target: /app
+          action: sync
